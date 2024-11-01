@@ -15,6 +15,7 @@
 package data
 
 import (
+	"fmt"
 	"math/rand"
 	"unsafe"
 
@@ -36,7 +37,7 @@ type (
 	StringGenerator struct {
 		len int
 		src rand.Source
-		val string
+		v   string
 	}
 )
 
@@ -45,10 +46,14 @@ func NewStringGenerator(cfg Config) (Generator, error) {
 		src: cfg.Source(),
 		len: cfg.Length(),
 	}
-	if cfg.Value() != nil {
-		ret.val = cfg.Value().(string)
-	}
+	if cfg.Static() {
+		v, ok := cfg.Value().(string)
+		if !ok {
+			return nil, fmt.Errorf("value '%s' of type '%T' is invalid for static string generation", cfg.Value(), cfg.Value())
+		}
+		ret.v = v
 
+	}
 	return ret, nil
 }
 
@@ -59,8 +64,8 @@ func NewStringGenerator(cfg Config) (Generator, error) {
  * See: https://stackoverflow.com/a/31832326/145479
  */
 func (s *StringGenerator) Next() interface{} {
-	if s.val != "" {
-		return s.val
+	if s.v != "" {
+		return s.v
 	}
 	b := make([]byte, s.len)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!

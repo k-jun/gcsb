@@ -36,6 +36,7 @@ type (
 	StringGenerator struct {
 		len int
 		src rand.Source
+		val string
 	}
 )
 
@@ -43,6 +44,9 @@ func NewStringGenerator(cfg Config) (Generator, error) {
 	ret := &StringGenerator{
 		src: cfg.Source(),
 		len: cfg.Length(),
+	}
+	if cfg.Value() != nil {
+		ret.val = cfg.Value().(string)
 	}
 
 	return ret, nil
@@ -55,6 +59,9 @@ func NewStringGenerator(cfg Config) (Generator, error) {
  * See: https://stackoverflow.com/a/31832326/145479
  */
 func (s *StringGenerator) Next() interface{} {
+	if s.val != "" {
+		return s.val
+	}
 	b := make([]byte, s.len)
 	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
 	for i, cache, remain := s.len-1, s.src.Int63(), letterIdxMax; i >= 0; {

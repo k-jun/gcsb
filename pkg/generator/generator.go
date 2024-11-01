@@ -204,6 +204,10 @@ func GetDefaultGeneratorForType(t spansql.Type, cfg data.Config) (data.Generator
 	case spansql.Bool:
 		g, err = data.NewBooleanGenerator(cfg)
 	case spansql.String:
+		if cfg.Value() != nil {
+			g, err = data.NewStringGenerator(cfg)
+			break
+		}
 		// Infer UUID v4 pattern from the column length.
 		if t.Len == uuidV4Length {
 			g, err = data.NewUUIDV4Generator(t.Base, t.Len)
